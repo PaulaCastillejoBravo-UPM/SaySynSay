@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SaySynSay</string>
+
+    <string name="home_description">Discover words, meanings and synonyms</string>
+    <string name="login_email">Continuar con email</string>
+    <string name="login_github">Continuar con GitHub</string>
+    <string name="login_anonymous">Continuar anonimamente</string>
+
+    <string name="anonymous_login_error">No se ha podido iniciar la sesión anónima.</string>
 </resources>

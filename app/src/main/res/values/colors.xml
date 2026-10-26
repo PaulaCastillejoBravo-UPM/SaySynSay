@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="purple_primary">#7652C8</color>
+    <color name="coral">#FF796C</color>
+    <color name="turquoise">#35BFA0</color>
+    <color name="yellow">#FFC857</color>
+
+    <color name="background">#FFF9F5</color>
+    <color name="text_primary">#292536</color>
+    <color name="text_secondary">#716D7A</color>
 </resources>
