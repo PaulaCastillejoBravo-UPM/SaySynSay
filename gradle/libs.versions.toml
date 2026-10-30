@@ -11,6 +11,10 @@ googleGmsGoogleServices = '4.5.0'
 firebaseBoMVersion = '35.0.2'
 firebaseUIAuthVersion = '9.1.1'
 firebaseAuth = '25.0.0'
+gsonVersion = '2.14.0'
+retrofitVersion = '3.0.0'
+javaxAnnotationVersion = '3.1.1'
+flexbox = "3.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -25,6 +29,11 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUIAuthVersion" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofitVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+javax-annotation = { module = "org.glassfish:javax.annotation", version.ref = "javaxAnnotationVersion" }
+flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

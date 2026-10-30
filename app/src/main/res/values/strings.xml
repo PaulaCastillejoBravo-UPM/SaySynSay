@@ -5,6 +5,31 @@
     <string name="login_email">Continuar con email</string>
     <string name="login_github">Continuar con GitHub</string>
     <string name="login_anonymous">Continuar anonimamente</string>
+    <string name="login_error_generic">No se ha podido iniciar la sesión.</string>
 
-    <string name="anonymous_login_error">No se ha podido iniciar la sesión anónima.</string>
+    <string name="word_hint">Escribe una palabra en inglés</string>
+    <string name="search_button">Buscar</string>
+    <string name="clear_button">Borrar</string>
+    <string name="search_empty">Escribe una palabra para buscar.</string>
+    <string name="search_error">No se ha podido obtener la palabra.</string>
+    <string name="search_not_found">No se ha encontrado esa palabra.</string>
+
+    <string name="pronunciation_label">Pronunciación IPA</string>
+    <string name="forms_label">Formas gramaticales</string>
+
+    <string name="synonyms_label">Sinónimos</string>
+    <string name="antonyms_label">Antónimos</string>
+
+    <string name="examples_label">Ejemplos</string>
+
+
+    <string name="save_word">Guardar palabra</string>
+    <string name="tab_definitions">Definiciones</string>
+    <string name="tab_synonyms">Sinónimos</string>
+    <string name="tab_forms">Formas</string>
+
+    <string name="listen_pronunciation_description">Escuchar pronuncioción</string>
+
+    <string name="logout">Cerrar sesión</string>
+    <string name="logout_error_generic">No se ha podido cerrar la sesión.</string>
 </resources>

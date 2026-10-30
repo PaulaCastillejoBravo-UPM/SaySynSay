@@ -46,4 +46,9 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson)
+    implementation(libs.javax.annotation)
+    implementation(libs.flexbox)
 }

@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                         if (user != null) irAlBuscador();
                     } else {
-                        Toast.makeText(this, getString(R.string.anonymous_login_error), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.login_error_generic), Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -118,7 +118,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         } else {
             if (response != null && response.getError() != null) {
-
+                Toast.makeText(this, getString(R.string.login_error_generic), Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -11,4 +11,49 @@
     <color name="background">#FFF9F5</color>
     <color name="text_primary">#292536</color>
     <color name="text_secondary">#716D7A</color>
+
+    <color name="red_intense">#D32F2F</color>
+    <color name="grey_medium">#757575</color>
+    <color name="blue">#315D9D</color>
+
+    <color name="badge_adjective_bg">#EDE0FF</color>
+    <color name="badge_adjective_text">#6335A5</color>
+
+    <color name="badge_noun_bg">#DCEBFF</color>
+    <color name="badge_noun_text">#174EA6</color>
+
+    <color name="badge_verb_bg">#FCE3D5</color>
+    <color name="badge_verb_text">#943D16</color>
+
+    <color name="badge_adverb_bg">#FFF0C2</color>
+    <color name="badge_adverb_text">#795400</color>
+
+    <color name="badge_preposition_bg">#D9F3F0</color>
+    <color name="badge_preposition_text">#086B64</color>
+
+    <color name="badge_interjection_bg">#F8DFF0</color>
+    <color name="badge_interjection_text">#8A285F</color>
+
+    <color name="badge_pronoun_bg">#E2F2C2</color>
+    <color name="badge_pronoun_text">#42651B</color>
+
+    <color name="badge_conjunction_bg">#E4E8F7</color>
+    <color name="badge_conjunction_text">#384A86</color>
+
+    <color name="badge_determiner_bg">#F7D7A3</color>
+    <color name="badge_determiner_text">#704500</color>
+
+    <color name="badge_particle_bg">#D8E2E8</color>
+    <color name="badge_particle_text">#344B5A</color>
+
+    <color name="badge_default_bg">#E8EAF0</color>
+    <color name="badge_default_text">#343746</color>
+
+    <color name="border_card">#E0E0E0</color>
+
+    <color name="chip_synonym_bg">#DDF5E5</color>
+    <color name="chip_synonym_text">#216B3B</color>
+
+    <color name="chip_antonym_bg">#FCE2E3</color>
+    <color name="chip_antonym_text">#A52F38</color>
 </resources>
