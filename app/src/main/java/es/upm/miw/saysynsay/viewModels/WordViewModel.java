@@ -1,4 +1,4 @@
-package es.upm.miw.saysynsay;
+package es.upm.miw.saysynsay.viewModels;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;

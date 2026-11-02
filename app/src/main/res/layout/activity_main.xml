@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:padding="34dp"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <!-- 1. Buscador: permanece visible -->
     <LinearLayout
@@ -116,12 +116,12 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:contentDescription="@string/save_word"
-            android:src="@android:drawable/btn_star_big_off"
+            android:src="@drawable/button_bookmark_heart_24px"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/blue" />
+            app:tint="@color/blue"
+            android:onClick="guardarVocabulario"/>
 
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/layoutPestanas"

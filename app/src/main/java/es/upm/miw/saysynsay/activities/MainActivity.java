@@ -1,6 +1,7 @@
-package es.upm.miw.saysynsay;
+package es.upm.miw.saysynsay.activities;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.Menu;
@@ -11,12 +12,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -25,10 +28,25 @@ import androidx.lifecycle.ViewModelProvider;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import es.upm.miw.saysynsay.FreeDictionaryRESTAPIService;
+import es.upm.miw.saysynsay.R;
+import es.upm.miw.saysynsay.dialogs.LoginVocabularyDialog;
+import es.upm.miw.saysynsay.dialogs.SourceDialog;
+import es.upm.miw.saysynsay.viewModels.WordViewModel;
 import es.upm.miw.saysynsay.models.Entry;
 import es.upm.miw.saysynsay.models.Form;
 import es.upm.miw.saysynsay.models.Pronunciation;
@@ -42,6 +60,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private static final String API_BASE_URL = "https://freedictionaryapi.com/api/v1/";
+    private static final String DATABASE_URL = "https://saysynsay-default-rtdb.europe-west1.firebasedatabase.app/";
+    public static final String HISTORY_NODE = "historialBusquedas";
+
     private FreeDictionaryRESTAPIService apiService;
 
     private EditText etWord;
@@ -71,62 +92,42 @@ public class MainActivity extends AppCompatActivity {
     private TextToSpeech sintetizador;
     private boolean sintetizadorPreparado = false;
 
-
     private WordViewModel wordViewModel;
+
+    private FirebaseDatabase database;
+    private DatabaseReference referenciaHistorial;
+
+    private ActivityResultLauncher<Intent> lanzadorHistorial = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), resultado -> {
+        if (resultado.getResultCode() == RESULT_OK && resultado.getData() != null) {
+            String palabra = resultado.getData().getStringExtra(HistoryActivity.EXTRA_PALABRA_SELECCIONADA);
+
+            if (palabra != null && !palabra.isEmpty()) {
+                realizarBusqueda(palabra, false);
+            }
+        }
+    });
+    private ActivityResultLauncher<Intent> lanzadorMiVocabulario = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), resultado -> {
+        if (resultado.getResultCode() == RESULT_OK && resultado.getData() != null) {
+            String palabra = resultado.getData().getStringExtra(MyVocabularyActivity.EXTRA_PALABRA_SELECCIONADA);
+
+            if (palabra != null && !palabra.isEmpty()) {
+                realizarBusqueda(palabra, false);
+            }
+        }
+    });
+
+    private FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        estableceInserciones();
+        establecerInserciones();
 
-        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        inicializarComponentes();
+        inicializarAPI();
 
-        etWord = findViewById(R.id.etWord);
-
-        tvRespuesta = findViewById(R.id.tvRespuesta);
-        tvPalabra = findViewById(R.id.tvPalabra);
-        tvPronunciacion = findViewById(R.id.tvPronunciacion);
-
-        btnTabDefiniciones = findViewById(R.id.btnTabDefiniciones);
-        btnTabSinonimos = findViewById(R.id.btnTabSinonimos);
-        btnTabFormas = findViewById(R.id.btnTabFormas);
-
-        indicadorDefiniciones = findViewById(R.id.indicadorDefiniciones);
-        indicadorSinonimos = findViewById(R.id.indicadorSinonimos);
-        indicadorFormas = findViewById(R.id.indicadorFormas);
-
-        scrollDefiniciones = findViewById(R.id.scrollDefiniciones);
-        scrollSinonimos = findViewById(R.id.scrollSinonimos);
-        scrollFormas = findViewById(R.id.scrollFormas);
-
-        btnTabDefiniciones.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(0));
-        btnTabSinonimos.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(1));
-        btnTabFormas.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(2));
-
-        layoutDefiniciones = findViewById(R.id.layoutDefiniciones);
-        layoutFormas = findViewById(R.id.layoutFormas);
-        layoutEtiquetasSinonimos = findViewById(R.id.layoutEtiquetasSinonimos);
-        layoutEtiquetasAntonimos = findViewById(R.id.layoutEtiquetasAntonimos);
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        apiService = retrofit.create(FreeDictionaryRESTAPIService.class);
-
-
-        sintetizador = new TextToSpeech(this, estado -> {
-            if (estado == TextToSpeech.SUCCESS) {
-                int resultado = sintetizador.setLanguage(Locale.UK);
-                sintetizadorPreparado = resultado != TextToSpeech.LANG_MISSING_DATA && resultado != TextToSpeech.LANG_NOT_SUPPORTED;
-            }
-        });
-
-        btnPronunciar = findViewById(R.id.btnPronunciar);
 
         btnPronunciar.setOnClickListener(v -> {
             String palabra = tvPalabra.getText().toString();
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         wordViewModel.getPalabra().observe(this, palabra -> {
             if (palabra != null) {
                 mostrarResultado(palabra);
+                comprobarPalabraGuardada(palabra.getWord());
             }
         });
 
@@ -148,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        configuraNavegacion();
+        configurarNavegacion();
     }
 
     @Override
@@ -178,6 +180,43 @@ public class MainActivity extends AppCompatActivity {
                         finish();
                     });
 
+            return true;
+        } else if (item.getItemId() == R.id.opcHistory) {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            lanzadorHistorial.launch(intent);
+            return true;
+        } else if (item.getItemId() == R.id.opcSource) {
+            Word palabraActual = wordViewModel.getPalabra().getValue();
+
+            if (palabraActual == null) {
+                Snackbar.make(
+                        findViewById(R.id.main),
+                        R.string.source_unavailable,
+                        Snackbar.LENGTH_SHORT
+                ).show();
+
+                return true;
+            }
+
+            String sourceUrl = null;
+            String licenseName = null;
+            String licenseUrl = null;
+
+            if (palabraActual.getSource() != null) {
+                sourceUrl = palabraActual.getSource().getUrl();
+
+                if (palabraActual.getSource().getLicense() != null) {
+                    licenseName = palabraActual.getSource().getLicense().getName();
+                    licenseUrl = palabraActual.getSource().getLicense().getUrl();
+                }
+            }
+
+            SourceDialog dialogo = SourceDialog.newInstance(sourceUrl, licenseName, licenseUrl);
+            dialogo.show(getSupportFragmentManager(), "SourceDialog");
+            return true;
+        } else if (item.getItemId() == R.id.opcVocabulary) {
+            Intent intent = new Intent(MainActivity.this, MyVocabularyActivity.class);
+            lanzadorMiVocabulario.launch(intent);
             return true;
         }
 
@@ -229,36 +268,24 @@ public class MainActivity extends AppCompatActivity {
                     wordViewModel.limpiarHistorialNavegacion();
                 }
 
+                guardarBusqueda(word);
+
                 wordViewModel.setPalabra(result);
-
-
             }
 
             @Override
             public void onFailure(Call<Word> call, Throwable t) {
                 tvRespuesta.setText(R.string.search_error);
 
-                Toast.makeText(
-                        MainActivity.this,
+                Snackbar.make(
+                        findViewById(R.id.main),
                         t.getMessage() == null
                                 ? getString(R.string.search_error)
                                 : t.getMessage(),
-                        Toast.LENGTH_LONG
+                        Snackbar.LENGTH_LONG
                 ).show();
             }
         });
-    }
-
-
-    private void mostrarResultado(Word palabra) {
-        findViewById(R.id.layoutCabeceraPalabra).setVisibility(View.VISIBLE);
-        findViewById(R.id.layoutPestanas).setVisibility(View.VISIBLE);
-
-        tvPalabra.setText(palabra.getWord());
-        mostrarPronunciacion(palabra);
-        mostrarDefiniciones(palabra);
-        mostrarFormas(palabra);
-        mostrarSinonimosYAntonimos(palabra);
     }
 
     public void limpiarBuscador(View v) {
@@ -279,6 +306,17 @@ public class MainActivity extends AppCompatActivity {
         scrollFormas.setVisibility(View.GONE);
     }
 
+
+    private void mostrarResultado(Word palabra) {
+        findViewById(R.id.layoutCabeceraPalabra).setVisibility(View.VISIBLE);
+        findViewById(R.id.layoutPestanas).setVisibility(View.VISIBLE);
+
+        tvPalabra.setText(palabra.getWord());
+        mostrarPronunciacion(palabra);
+        mostrarDefiniciones(palabra);
+        mostrarFormas(palabra);
+        mostrarSinonimosYAntonimos(palabra);
+    }
 
     private void mostrarDefiniciones(Word word) {
         layoutDefiniciones.removeAllViews();
@@ -670,7 +708,180 @@ public class MainActivity extends AppCompatActivity {
         contenedor.addView(tvCategoria, parametros);
     }
 
-    private void configuraNavegacion() {
+
+    private void guardarBusqueda(String palabra){
+        FirebaseAuth usuario = FirebaseAuth.getInstance();
+
+        if (usuario.getCurrentUser() == null) {
+            return;
+        }
+
+        String uidUser = usuario.getCurrentUser().getUid();
+
+        DatabaseReference nuevaBusqueda = referenciaHistorial.child(uidUser).push();
+
+        Map<String, Object> datosBusqueda = new HashMap<>();
+        datosBusqueda.put("palabra", palabra);
+        datosBusqueda.put("fecha", ServerValue.TIMESTAMP);
+
+        nuevaBusqueda.setValue(datosBusqueda).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Snackbar.make(
+                        findViewById(R.id.main),
+                        getString(R.string.search_saved),
+                        Snackbar.LENGTH_SHORT
+                ).show();
+            } else {
+                String mensajeError = task.getException() != null ? task.getException().getMessage() : "";
+
+                Snackbar.make(
+                        findViewById(R.id.main),
+                        getString(R.string.search_save_error, mensajeError),
+                        Snackbar.LENGTH_LONG
+                ).show();
+            }
+        });
+    }
+
+    public void guardarVocabulario(View view) {
+        FirebaseAuth usuario = FirebaseAuth.getInstance();
+
+        if (usuario.getCurrentUser() == null ){
+            return;
+        }
+
+        if (usuario.getCurrentUser().isAnonymous()) {
+            new LoginVocabularyDialog().show(getSupportFragmentManager(), "LoginVocabularyDialog");
+            return;
+        }
+
+        String uidUser = usuario.getCurrentUser().getUid();
+
+        Word palabraActual = wordViewModel.getPalabra().getValue();
+
+        if (palabraActual == null) {
+            return;
+        }
+
+        CollectionReference vocabulario = firestore.collection("users")
+                .document(uidUser)
+                .collection("savedWords");
+        vocabulario.whereEqualTo("word", palabraActual.getWord())
+                .get()
+                .addOnSuccessListener(documentos -> {
+                    if (!documentos.isEmpty()) {
+                        documentos.getDocuments().get(0).getReference()
+                                .delete()
+                                .addOnSuccessListener(unused -> {
+                                    actualizarColorBotonGuardar(false);
+
+                                    Snackbar.make(
+                                            findViewById(R.id.main),
+                                            R.string.vocabulary_removed,
+                                            Snackbar.LENGTH_SHORT
+                                    ).show();
+                                })
+                                .addOnFailureListener(error -> {
+                                    String mensajeError = error.getMessage() != null ? error.getMessage() : "";
+
+                                    Snackbar.make(
+                                            findViewById(R.id.main),
+                                            getString(R.string.vocabulary_remove_error, mensajeError),
+                                            Snackbar.LENGTH_LONG
+                                    ).show();
+                                });
+
+                    } else {
+                        Map<String, Object> datosPalabra = new HashMap<>();
+
+                        datosPalabra.put("word", palabraActual.getWord());
+                        datosPalabra.put("entries", palabraActual.getEntries());
+                        datosPalabra.put("source", palabraActual.getSource());
+                        datosPalabra.put("saveDate", FieldValue.serverTimestamp());
+
+                        vocabulario.add(datosPalabra)
+                                .addOnSuccessListener(documentReference -> {
+                                    actualizarColorBotonGuardar(true);
+
+                                    Snackbar.make(
+                                            findViewById(R.id.main),
+                                            R.string.vocabulary_saved,
+                                            Snackbar.LENGTH_SHORT
+                                    ).show();
+                                })
+                                .addOnFailureListener(error -> {
+                                    String mensajeError = error.getMessage() != null ? error.getMessage() : "";
+
+                                    Snackbar.make(
+                                            findViewById(R.id.main),
+                                            getString(R.string.vocabulary_save_error, mensajeError),
+                                            Snackbar.LENGTH_LONG
+                                    ).show();
+                                });
+                    }
+                })
+                .addOnFailureListener(error -> {
+                    String mensajeError = error.getMessage() != null ? error.getMessage() : "";
+
+                    Snackbar.make(
+                            findViewById(R.id.main),
+                            getString(R.string.vocabulary_check_error, mensajeError),
+                            Snackbar.LENGTH_LONG
+                    ).show();
+                });
+    }
+
+    private void comprobarPalabraGuardada(String palabra) {
+        FirebaseAuth usuario = FirebaseAuth.getInstance();
+
+        if (usuario.getCurrentUser() == null || usuario.getCurrentUser().isAnonymous()) {
+            actualizarColorBotonGuardar(false);
+            return;
+        }
+
+        String uidUser = usuario.getCurrentUser().getUid();
+
+        CollectionReference vocabulario = firestore.collection("users")
+                .document(uidUser)
+                .collection("savedWords");
+
+        actualizarColorBotonGuardar(false);
+
+        vocabulario.whereEqualTo("word", palabra)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(documentos -> {
+                    Word palabraActual = wordViewModel.getPalabra().getValue();
+
+                    if (palabraActual != null && palabra.equalsIgnoreCase(palabraActual.getWord())) {
+                        actualizarColorBotonGuardar(!documentos.isEmpty());
+                    }
+                })
+                .addOnFailureListener(error -> {
+                    Snackbar.make(
+                            findViewById(R.id.main),
+                            R.string.vocabulary_check_error,
+                            Snackbar.LENGTH_LONG
+                    ).show();
+                });
+    }
+    private void actualizarColorBotonGuardar(boolean guardada) {
+        ImageButton boton = findViewById(R.id.btnGuardarPalabra);
+
+        int color = ContextCompat.getColor(this, guardada ? R.color.pink : R.color.blue);
+
+        boton.setImageTintList(ColorStateList.valueOf(color));
+    }
+
+    private void establecerInserciones() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+
+    private void configurarNavegacion() {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -692,11 +903,58 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void estableceInserciones() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+    private void inicializarComponentes() {
+        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+
+        etWord = findViewById(R.id.etWord);
+
+        tvRespuesta = findViewById(R.id.tvRespuesta);
+        tvPalabra = findViewById(R.id.tvPalabra);
+        tvPronunciacion = findViewById(R.id.tvPronunciacion);
+
+        btnTabDefiniciones = findViewById(R.id.btnTabDefiniciones);
+        btnTabSinonimos = findViewById(R.id.btnTabSinonimos);
+        btnTabFormas = findViewById(R.id.btnTabFormas);
+
+        indicadorDefiniciones = findViewById(R.id.indicadorDefiniciones);
+        indicadorSinonimos = findViewById(R.id.indicadorSinonimos);
+        indicadorFormas = findViewById(R.id.indicadorFormas);
+
+        scrollDefiniciones = findViewById(R.id.scrollDefiniciones);
+        scrollSinonimos = findViewById(R.id.scrollSinonimos);
+        scrollFormas = findViewById(R.id.scrollFormas);
+
+        btnTabDefiniciones.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(0));
+        btnTabSinonimos.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(1));
+        btnTabFormas.setOnClickListener(v -> wordViewModel.setPestanaSeleccionada(2));
+
+        layoutDefiniciones = findViewById(R.id.layoutDefiniciones);
+        layoutFormas = findViewById(R.id.layoutFormas);
+        layoutEtiquetasSinonimos = findViewById(R.id.layoutEtiquetasSinonimos);
+        layoutEtiquetasAntonimos = findViewById(R.id.layoutEtiquetasAntonimos);
+
+        database = FirebaseDatabase.getInstance(DATABASE_URL);
+        referenciaHistorial = database.getReference(HISTORY_NODE);
+
+        firestore = FirebaseFirestore.getInstance();
+
+        sintetizador = new TextToSpeech(this, estado -> {
+            if (estado == TextToSpeech.SUCCESS) {
+                int resultado = sintetizador.setLanguage(Locale.UK);
+                sintetizadorPreparado = resultado != TextToSpeech.LANG_MISSING_DATA
+                        && resultado != TextToSpeech.LANG_NOT_SUPPORTED;
+            }
         });
+
+        btnPronunciar = findViewById(R.id.btnPronunciar);
+    }
+
+    private void inicializarAPI() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiService = retrofit.create(FreeDictionaryRESTAPIService.class);
     }
 }

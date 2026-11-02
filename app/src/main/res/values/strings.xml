@@ -32,4 +32,55 @@
 
     <string name="logout">Cerrar sesión</string>
     <string name="logout_error_generic">No se ha podido cerrar la sesión.</string>
+
+    <string name="search_saved">Búsqueda guardada</string>
+    <string name="search_save_error">Error al guardar: %1$s</string>
+
+    <string name="history">Historial</string>
+
+    <string name="history_delete_success">Búsqueda eliminada correctamente</string>
+    <string name="history_delete_error">No se ha podido eliminar la búsqueda</string>
+
+    <string name="source">Fuente y licencia</string>
+
+    <string name="source_attribution_title">Atribución</string>
+    <string name="source_attribution">Datos proporcionados por FreeDictionaryAPI.com.</string>
+
+    <string name="source_original_title">Fuente original</string>
+    <string name="source_original_placeholder">Consultando fuente...</string>
+    <string name="source_original_link">Consultar Wiktionary</string>
+
+    <string name="source_license_title">Licencia</string>
+    <string name="source_license_placeholder">Consultando licencia...</string>
+    <string name="source_license_link">Consultar licencia</string>
+
+    <string name="source_unavailable">Primero busca una palabra para consultar su fuente.</string>
+
+    <string name="close">Cerrar</string>
+
+    <string name="myVocabulary">Mi vocabulario</string>
+
+    <string name="vocabulary_saved">Palabra guardada en tu vocabulario</string>
+    <string name="vocabulary_save_error">Error al guardar la palabra: %1$s</string>
+
+    <string name="vocabulary_removed">Palabra eliminada de tu vocabulario</string>
+    <string name="vocabulary_remove_error">Error al eliminar la palabra: %1$s</string>
+
+    <string name="vocabulary_check_error">Error al comprobar el vocabulario: %1$s</string>
+
+    <string name="save_vocabulary_dialog_title">¡Un paso más!</string>
+    <string name="save_vocabulary_dialog_message">Para guardar palabras en tu vocabulario necesitas iniciar sesión. Así podrás conservar tus palabras guardadas y acceder a ellas más adelante.</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="not_now">Ahora no</string>
+
+    <string name="remove_saved_word">Eliminar palabra del vocabulario</string>
+    <string name="vocabulary_remove_success">"%1$s" se ha eliminado de tu vocabulario.</string>
+
+
+    <string name="vocabulary_total_words">Total words</string>
+    <string name="vocabulary_total_categories">Categories</string>
+    <string name="vocabulary_categories">Parts of speech</string>
+    <string name="vocabulary_initial_count">0</string>
+
+    <string name="vocabulary_category_count">%1$s: %2$d</string>
 </resources>

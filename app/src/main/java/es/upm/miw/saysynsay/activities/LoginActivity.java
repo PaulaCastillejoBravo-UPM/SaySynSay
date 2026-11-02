@@ -1,4 +1,4 @@
-package es.upm.miw.saysynsay;
+package es.upm.miw.saysynsay.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,13 +23,23 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Arrays;
 import java.util.List;
 
+import es.upm.miw.saysynsay.R;
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String EXTRA_ACTUALIZAR_CUENTA_ANONIMA = "actualizarCuentaAnonima";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         estableceInserciones();
+
+        boolean actualizarCuentaAnonima = getIntent().getBooleanExtra(EXTRA_ACTUALIZAR_CUENTA_ANONIMA, false);
+
+        if (actualizarCuentaAnonima) {
+            findViewById(R.id.btnAnonymous).setVisibility(View.GONE);
+        }
 
         findViewById(R.id.btnEmail).setOnClickListener(this);
         findViewById(R.id.btnGitHub).setOnClickListener(this);
@@ -71,6 +81,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setCredentialManagerEnabled(false)
+                .enableAnonymousUsersAutoUpgrade()
                 .setAvailableProviders(authProviders)
                 .build();
 
@@ -85,6 +96,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setCredentialManagerEnabled(false)
+                .enableAnonymousUsersAutoUpgrade()
                 .setAvailableProviders(authProviders)
                 .build();
 

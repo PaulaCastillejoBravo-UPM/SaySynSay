@@ -15,9 +15,6 @@ public class Pronunciation {
     @SerializedName("text")
     @Expose
     private String text;
-    @SerializedName("tags")
-    @Expose
-    private List<String> tags = new ArrayList<String>();
 
     public String getType() {
         return type;
@@ -35,14 +32,6 @@ public class Pronunciation {
         this.text = text;
     }
 
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -54,16 +43,6 @@ public class Pronunciation {
         sb.append("text");
         sb.append('=');
         sb.append(((this.text == null)?"<null>":this.text));
-        sb.append(',');
-        sb.append("tags");
-        sb.append('=');
-        sb.append(((this.tags == null)?"<null>":this.tags));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
         return sb.toString();
     }
 
