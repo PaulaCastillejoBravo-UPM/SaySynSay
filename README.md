@@ -1,6 +1,11 @@
 # SAYSYNSAY
-*Proyecto Android desarrollado en Java*
-**Autora:** Paula Castillejo Bravo
+*Proyecto Android desarrollado en Java*.
+
+**Autora:** Paula Castillejo Bravo.
+
+Se puede consultar el siguiente vídeo para ver una demostración del funcionamiento de la aplicación: [Vídeo de demostración](https://youtu.be/E48Ti1xFun4).
+
+Se pueden consultar las capturas de pantalla de muestra de la aplicación desde la carpeta [Screenshot](./Screenshot/), ubicada en la raíz de proyecto.
 
 ---
 
